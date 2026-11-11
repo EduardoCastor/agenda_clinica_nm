@@ -1,284 +1,161 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SEME - Agendamentos</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="icon" href="assets/logo-brasão.png" type="image/png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123c4a">
+  <meta name="description" content="Agendamento de consultas da Clínica Dr. Newton Mureb.">
+  <title>Agendamento | Clínica Dr. Newton Mureb</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-
 <body>
-
-    <!-- HEADER -->
-    <header>
-        <div class="header-inner">
-            <img src="assets/logo.webp" alt="Logo Prefeitura" class="logo">
-            <div class="header-center">
-                <p>Superintendência de Gestão de Pessoas</p>
-            </div>
-            <div class="header-text">
-                <h1>Cabo Frio</h1>
-                <p>Secretaria Municipal de Educação</p>
-            </div>
-        </div>
-        <div class="header-stripe"></div>
-    </header>
-
-    <main>
-
-        <!-- ABAS -->
-        <div class="tabs-wrapper">
-            <button class="tab active" data-tab="agenda">
-                <svg viewBox="0 0 24 24">
-                    <rect x="3" y="4" width="18" height="18" rx="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                </svg>
-                Agendar Atendimento
-            </button>
-            <button class="tab" data-tab="cancel">
-                <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="15" y1="9" x2="9" y2="15" />
-                    <line x1="9" y1="9" x2="15" y2="15" />
-                </svg>
-                Cancelar Agendamento
-            </button>
-        </div>
-
-        <!-- ════ VIEW: AGENDAMENTO ════ -->
-        <div class="view-panel active" id="panelAgenda">
-
-            <div class="page-title">
-                <div class="page-icon icon-blue">
-                    <svg viewBox="0 0 24 24">
-                        <rect x="3" y="4" width="18" height="18" rx="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                    </svg>
-                </div>
-                <div>
-                    <h2>Agendamento de Atendimento Presencial</h2>
-                    <p>Preencha os dados abaixo para agendar seu atendimento</p>
-                </div>
-            </div>
-
-            <form id="formAgenda" novalidate>
-                <div class="form-grid">
-
-                    <!-- Dados pessoais -->
-                    <div class="form-section">
-                        <h3 class="section-title">Dados Pessoais</h3>
-
-                        <div class="field-group">
-                            <label for="nome">Nome completo</label>
-                            <input type="text" id="nome" name="nome" placeholder="Seu nome completo" required>
-                        </div>
-
-                        <div class="field-row">
-                            <div class="field-group">
-                                <label for="celular">Celular</label>
-                                <input type="tel" id="celular" name="celular" placeholder="22999999999"
-                                    inputmode="numeric" required>
-                            </div>
-                            <div class="field-group">
-                                <label for="cpf">CPF</label>
-                                <input type="text" id="cpf" name="cpf" placeholder="Somente números" inputmode="numeric"
-                                    required>
-                            </div>
-                        </div>
-
-                        <div class="field-group">
-                            <label for="email">E-mail</label>
-                            <input type="email" id="email" name="email" placeholder="seuemail@exemplo.com" required>
-                        </div>
-                    </div>
-
-                    <!-- Dados do atendimento -->
-                    <div class="form-section">
-                        <h3 class="section-title">Dados do Atendimento</h3>
-
-                        <div class="field-group">
-                            <label for="tipo_atendimento">Assunto / Setor</label>
-                            <select name="tipo_atendimento" id="tipo_atendimento" required>
-                                <option value="">Selecione o Assunto/Setor</option>
-                                <option>APOSENTADORIA</option>
-                                <option>DECLARAÇÕES</option>
-                                <option>EXONERAÇÃO/DEMISSÃO/DESVINCULO</option>
-                                <option>FÉRIAS</option>
-                                <option>INSALUBRIDADE</option>
-                                <option>LICENÇA MÉDICA/READAPTAÇÃO</option>
-                                <option>LICENÇA-PRÊMIO</option>
-                                <option>OUTRAS LICENÇAS E AFASTAMENTOS</option>
-                                <option>PAGAMENTOS</option>
-                                <option>PERMUTA</option>
-                                <option>PIS/PASEP (DECLARAÇÕES)</option>
-                                <option>PROCESSO SELETIVO</option>
-                                <option>RESCISÃO DE CONTRATO</option>
-                                <option>REMANEJAMENTO</option>
-                                <option>VALE TRANSPORTE</option>
-                                <option>OUTROS</option>
-                            </select>
-                        </div>
-
-                        <div class="field-group">
-                            <label for="assunto">Descrição</label>
-                            <textarea id="assunto" name="assunto"
-                                placeholder="Descreva brevemente o motivo do atendimento" required></textarea>
-                        </div>
-
-                        <div class="field-row">
-                            <div class="field-group">
-                                <label for="data">Data</label>
-                                <input type="date" id="data" required>
-                            </div>
-                            <div class="field-group">
-                                <label for="horarios">Horário disponível</label>
-                                <select id="horarios" required>
-                                    <option value="">Selecione o horário</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="form-footer">
-                    <button type="submit" id="btnAgendar" disabled>
-                        <svg viewBox="0 0 24 24">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <polyline points="22 4 12 14.01 9 11.01" />
-                        </svg>
-                        Agendar Atendimento
-                    </button>
-                </div>
-            </form>
-
-            <div id="successAgenda" class="success-msg hidden">
-                <div class="success-icon icon-green">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                </div>
-                <h3>Agendamento confirmado!</h3>
-                <p>Compareça no horário selecionado com um documento de identificação.</p>
-                <button class="btn-novo" onclick="resetAgenda()">Fazer novo agendamento</button>
-            </div>
-
-        </div><!-- /panelAgenda -->
-
-        <!-- ════ VIEW: CANCELAMENTO ════ -->
-        <div class="view-panel" id="panelCancel">
-
-            <div class="page-title">
-                <div class="page-icon icon-red">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="15" y1="9" x2="9" y2="15" />
-                        <line x1="9" y1="9" x2="15" y2="15" />
-                    </svg>
-                </div>
-                <div>
-                    <h2>Cancelar Agendamento</h2>
-                    <p>Informe o número do protocolo para cancelar seu atendimento</p>
-                </div>
-            </div>
-
-            <form id="formCancel" novalidate>
-                <div class="cancel-card">
-
-                    <div class="cancel-info">
-                        <svg viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="12" y1="8" x2="12" y2="12" />
-                            <line x1="12" y1="16" x2="12.01" y2="16" />
-                        </svg>
-                        O número do protocolo foi enviado para o seu e-mail no momento do agendamento.
-                    </div>
-
-                    <div class="field-group">
-                        <label for="protocolo">Número do Protocolo</label>
-                        <input type="text" id="protocolo" placeholder="Digite apenas os números do protocolo"
-                            inputmode="numeric" pattern="[0-9]*" required>
-                    </div>
-
-                    <button type="submit" id="btnCancelar">
-                        <svg viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="15" y1="9" x2="9" y2="15" />
-                            <line x1="9" y1="9" x2="15" y2="15" />
-                        </svg>
-                        Cancelar Agendamento
-                    </button>
-
-                </div>
-            </form>
-
-            <div id="feedbackCancel" class="feedback-cancel hidden"></div>
-
-        </div><!-- /panelCancel -->
-
-    </main>
-
-  <!-- ═══════════════════════════════════════ MODAL: COMUNICADO -->
-    <div class="modal-overlay" id="comunicadoModal" role="dialog" aria-modal="true" aria-labelledby="comunicadoTitulo">
-        <div class="modal-card">
-            <div class="modal-icon">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                </svg>
-            </div>
-            <h3 id="comunicadoTitulo">Atenção</h3>
-            <p><strong>COMUNICADO – AGENDAMENTO DE ATENDIMENTO</strong><br>
-                Informamos que, conforme disposto no item 5.13 do Edital nº 133/2026, referente ao Processo Seletivo, a Secretaria Municipal de Educação de Cabo Frio não emitirá declarações de tempo de serviço, exceto nos casos referentes a unidades escolares extintas.<br><br>
-                Dessa forma, o agendamento de atendimento deverá ser realizado exclusivamente por aqueles que necessitem de declarações de tempo de serviço referentes a unidades escolares extintas.<br><br>
-                Solicitamos que observem essa orientação antes de realizar o agendamento.<br>
-                Obrigado.
-            </p>
-            <div class="modal-actions">
-                <button type="button" class="modal-btn modal-btn-ghost" id="btnContinuarComunicado">Continuar</button>
-            </div>
-        </div>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-mark" aria-hidden="true">NM</div>
+      <div class="brand-copy">
+        <p class="eyebrow">Cuidado, saúde e qualidade de vida</p>
+        <h1>Clínica Dr. Newton Mureb</h1>
+        <p class="brand-subtitle">Atendimento médico com atenção individualizada</p>
+      </div>
+      <a class="header-link" href="https://www.drnewtonmureb.com.br/" target="_blank" rel="noopener noreferrer">Site da clínica</a>
     </div>
-    <script src="script.js"></script>
-    <script>
-      (() => {
-        const modal = document.getElementById('comunicadoModal');
-        const botao = document.getElementById('btnContinuarComunicado');
-        const chave = 'seme_comunicado_edital_133_2026_visto';
-        if (!modal || !botao) return;
+  </header>
 
-        let visto = false;
-        try { visto = sessionStorage.getItem(chave) === '1'; } catch (e) {}
+  <main>
+    <section class="intro">
+      <span class="intro-label">AGENDAMENTO ONLINE</span>
+      <h2>Sua saúde merece atenção.</h2>
+      <p>Escolha o melhor horário para seu atendimento. Nossa equipe terá satisfação em receber você.</p>
+    </section>
 
-        if (!visto) {
-          modal.classList.add('show');
-          document.body.style.overflow = 'hidden';
-        }
+    <nav class="tabs-wrapper" aria-label="Opções de atendimento">
+      <button class="tab active" type="button" data-tab="agenda" aria-selected="true">
+        <span class="tab-icon" aria-hidden="true">＋</span> Agendar consulta
+      </button>
+      <button class="tab" type="button" data-tab="cancel" aria-selected="false">
+        <span class="tab-icon" aria-hidden="true">×</span> Cancelar agendamento
+      </button>
+    </nav>
 
-        botao.addEventListener('click', () => {
-          modal.classList.remove('show');
-          document.body.style.overflow = '';
-          try { sessionStorage.setItem(chave, '1'); } catch (e) {}
-        });
-      })();
-    </script>
+    <section class="view-panel active" id="panelAgenda">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">NOVO AGENDAMENTO</span>
+          <h2>Agende seu atendimento</h2>
+          <p>Preencha seus dados e selecione a data e o horário disponíveis.</p>
+        </div>
+      </div>
 
+      <form id="formAgenda" novalidate>
+        <div class="form-grid">
+          <section class="form-section">
+            <h3 class="section-title">Seus dados</h3>
+            <div class="field-group">
+              <label for="nome">Nome completo</label>
+              <input type="text" id="nome" name="nome" placeholder="Informe seu nome completo" autocomplete="name" required>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label for="celular">Celular / WhatsApp</label>
+                <input type="tel" id="celular" name="celular" placeholder="(22) 99999-9999" inputmode="tel" autocomplete="tel" required>
+              </div>
+              <div class="field-group">
+                <label for="cpf">CPF</label>
+                <input type="text" id="cpf" name="cpf" placeholder="Somente números" inputmode="numeric" autocomplete="off" required>
+              </div>
+            </div>
+            <div class="field-group">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" placeholder="seuemail@exemplo.com" autocomplete="email" required>
+            </div>
+          </section>
 
+          <section class="form-section">
+            <h3 class="section-title">Dados da consulta</h3>
+            <div class="field-group">
+              <label for="tipo_atendimento">Tipo de atendimento</label>
+              <select name="tipo_atendimento" id="tipo_atendimento" required>
+                <option value="">Selecione o tipo de atendimento</option>
+                <option>Consulta clínica médica</option>
+                <option>Consulta em endocrinologia e metabologia</option>
+                <option>Consulta de acompanhamento</option>
+                <option>Consulta com bioimpedância</option>
+                <option>Retorno de consulta</option>
+                <option>Teleconsulta</option>
+                <option>Outro</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="assunto">Observações (opcional)</label>
+              <textarea id="assunto" name="assunto" placeholder="Se desejar, informe brevemente o motivo da consulta." rows="3"></textarea>
+            </div>
+            <div class="field-row">
+              <div class="field-group">
+                <label for="data">Data</label>
+                <input type="date" id="data" name="data" required>
+              </div>
+              <div class="field-group">
+                <label for="horarios">Horário disponível</label>
+                <select id="horarios" name="horario" required>
+                  <option value="">Selecione a data primeiro</option>
+                </select>
+              </div>
+            </div>
+            <p class="field-note">Os horários são atualizados conforme a disponibilidade da agenda.</p>
+          </section>
+        </div>
 
+        <div class="form-footer">
+          <button type="submit" id="btnAgendar" disabled>
+            <span aria-hidden="true">✓</span> Confirmar agendamento
+          </button>
+          <p class="privacy-note">Seus dados serão utilizados para organizar e confirmar seu atendimento.</p>
+        </div>
+      </form>
 
+      <div id="successAgenda" class="success-msg hidden" role="status" aria-live="polite">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h3>Solicitação enviada!</h3>
+        <p>Recebemos seus dados de agendamento. Aguarde a confirmação da clínica pelos canais informados.</p>
+        <button class="btn-novo" type="button" onclick="resetAgenda()">Fazer novo agendamento</button>
+      </div>
+    </section>
+
+    <section class="view-panel" id="panelCancel">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">CANCELAMENTO</span>
+          <h2>Cancelar agendamento</h2>
+          <p>Informe o protocolo recebido para localizar sua solicitação.</p>
+        </div>
+      </div>
+
+      <form id="formCancel" novalidate>
+        <div class="cancel-card">
+          <div class="cancel-info">
+            <span aria-hidden="true">i</span>
+            <p>O número do protocolo é enviado no momento do agendamento. Se não o localizar, entre em contato com a equipe da clínica.</p>
+          </div>
+          <div class="field-group">
+            <label for="protocolo">Número do protocolo</label>
+            <input type="text" id="protocolo" name="protocolo" placeholder="Digite apenas os números do protocolo" inputmode="numeric" pattern="[0-9]*" required>
+          </div>
+          <button type="submit" id="btnCancelar"><span aria-hidden="true">×</span> Solicitar cancelamento</button>
+        </div>
+      </form>
+      <div id="feedbackCancel" class="feedback-cancel hidden" role="status" aria-live="polite"></div>
+    </section>
+
+    <footer class="site-footer">
+      <p><strong>Clínica Dr. Newton Mureb</strong></p>
+      <p>Atendimento médico em Cabo Frio - RJ</p>
+      <a href="https://www.drnewtonmureb.com.br/" target="_blank" rel="noopener noreferrer">www.drnewtonmureb.com.br</a>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
 </body>
-
 </html>

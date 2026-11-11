@@ -1,369 +1,278 @@
-/* ═══════════════════════════════════════════════════════
-   AGENDA + CANCELAMENTO — script.js
-═══════════════════════════════════════════════════════ */
+/* =========================================================
+   CLÍNICA DR. NEWTON MUREB — AGENDAMENTO E CANCELAMENTO
+   Integração com webhooks n8n
+   ========================================================= */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // ENDPOINTS
+  const WEBHOOK_DISPONIBILIDADE =
+    'https://n8n.srv1352561.hstgr.cloud/webhook/agendadisp';
+  const WEBHOOK_AGENDAMENTO =
+    'https://n8n.srv1352561.hstgr.cloud/webhook/agendaclinica';
+  // Mantido o endpoint de cancelamento que já era utilizado.
+  const WEBHOOK_CANCELAMENTO =
+    'https://n8n.srv1352561.hstgr.cloud/webhook/cancelar';
 
-    // ════════════════════════════════════════════════════
-    // ABAS — NAVEGAÇÃO
-    // ════════════════════════════════════════════════════
-    const tabs = document.querySelectorAll('.tab');
-    const panels = document.querySelectorAll('.view-panel');
+  // Regras de calendário mantidas da versão anterior.
+  // Dias bloqueados: domingo (0), quarta-feira (3) e sábado (6).
+  const FERIADOS = [
+    '2026-01-01', '2026-04-21', '2026-04-23', '2026-04-24',
+    '2026-05-01', '2026-06-04', '2026-06-05', '2026-09-07',
+    '2026-10-12', '2026-11-02', '2026-11-13', '2026-11-20',
+    '2026-12-25'
+  ];
+  const DIAS_BLOQUEADOS = [0, 3, 6];
 
-    function switchTab(targetTab) {
-        tabs.forEach(t => t.classList.remove('active'));
-        panels.forEach(p => {
-            p.classList.remove('active');
-            p.style.display = 'none';
-        });
+  const formAgenda = document.getElementById('formAgenda');
+  const successAgenda = document.getElementById('successAgenda');
+  const selectHor = document.getElementById('horarios');
+  const inputData = document.getElementById('data');
+  const btnAgendar = document.getElementById('btnAgendar');
+  const camposObrigatorios = [...formAgenda.querySelectorAll('[required]')];
 
-        const activeTab = document.querySelector(`.tab[data-tab="${targetTab}"]`);
-        const activePanel = document.getElementById(`panel${capitalize(targetTab)}`);
+  const formCancel = document.getElementById('formCancel');
+  const protocoloEl = document.getElementById('protocolo');
+  const feedbackEl = document.getElementById('feedbackCancel');
+  const btnCancelar = document.getElementById('btnCancelar');
 
-        activeTab.classList.add('active');
-        activePanel.style.display = 'block';
+  const toISO = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
 
-        void activePanel.offsetWidth;
-        activePanel.classList.add('active');
+  const isDiaUtil = (date) =>
+    !DIAS_BLOQUEADOS.includes(date.getDay()) &&
+    !FERIADOS.includes(toISO(date));
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+  function proximoDiaUtil(base = new Date()) {
+    const date = new Date(base);
+    do {
+      date.setDate(date.getDate() + 1);
+    } while (!isDiaUtil(date));
+    return date;
+  }
+
+  function addDiasUteis(base, quantidade) {
+    const date = new Date(base);
+    let contagem = 0;
+    while (contagem < quantidade) {
+      date.setDate(date.getDate() + 1);
+      if (isDiaUtil(date)) contagem++;
     }
+    return date;
+  }
 
-    function capitalize(s) {
-        return s.charAt(0).toUpperCase() + s.slice(1);
-    }
+  // NAVEGAÇÃO ENTRE ABAS
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.view-panel');
 
+  function switchTab(target) {
     tabs.forEach(tab => {
-        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+      const active = tab.dataset.tab === target;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', String(active));
     });
 
-    panels.forEach(p => {
-        if (!p.classList.contains('active')) {
-            p.style.display = 'none';
-        }
+    panels.forEach(panel => {
+      panel.classList.toggle('active', panel.id === `panel${target === 'agenda' ? 'Agenda' : 'Cancel'}`);
     });
 
-    // ════════════════════════════════════════════════════
-    // CONSTANTES COMPARTILHADAS
-    // ════════════════════════════════════════════════════
-    const BASE_URL = 'https://n8n.srv1352561.hstgr.cloud/webhook';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-    const FERIADOS = [
-        '2026-01-01', '2026-04-21', '2026-04-23', '2026-04-24',
-        '2026-05-01', '2026-06-04', '2026-06-05', '2026-09-07',
-        '2026-10-12', '2026-11-02', '2026-11-13', '2026-11-20', '2026-12-25'
-    ];
+  tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
 
-    const DIAS_BLOQUEADOS = [0, 3, 6]; // Dom, Qua, Sáb
+  // VALIDAÇÃO DO FORMULÁRIO
+  function validarFormularioAgenda() {
+    const preenchidos = camposObrigatorios.every(campo => {
+      if (campo.type === 'checkbox' || campo.type === 'radio') return campo.checked;
+      return String(campo.value || '').trim() !== '';
+    });
+    btnAgendar.disabled = !(preenchidos && selectHor.value);
+  }
 
-    function toISO(d) {
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
+  camposObrigatorios.forEach(campo => {
+    campo.addEventListener('input', validarFormularioAgenda);
+    campo.addEventListener('change', validarFormularioAgenda);
+  });
+  selectHor.addEventListener('change', validarFormularioAgenda);
 
-    function isDiaUtil(d) {
-        return !DIAS_BLOQUEADOS.includes(d.getDay()) && !FERIADOS.includes(toISO(d));
-    }
+  // CALENDÁRIO
+  function configurarCalendario() {
+    const hoje = new Date();
+    if (hoje.getHours() >= 16) hoje.setDate(hoje.getDate() + 1);
+    hoje.setHours(0, 0, 0, 0);
 
-    function proximoDiaUtil(base = new Date()) {
-        const d = new Date(base);
-        do {
-            d.setDate(d.getDate() + 1);
-        } while (!isDiaUtil(d));
-        return d;
-    }
+    const primeiraData = proximoDiaUtil(hoje);
+    const ultimaData = addDiasUteis(hoje, 5);
 
-    function addDiasUteis(base, n) {
-        const d = new Date(base);
-        let c = 0;
+    inputData.min = toISO(primeiraData);
+    inputData.max = toISO(ultimaData);
+    inputData.value = toISO(primeiraData);
+  }
 
-        while (c < n) {
-            d.setDate(d.getDate() + 1);
-            if (isDiaUtil(d)) c++;
-        }
+  // DISPONIBILIDADE
+  async function carregarHorarios() {
+    const dataSelecionada = inputData.value;
+    if (!dataSelecionada) return;
 
-        return d;
-    }
-
-    // ════════════════════════════════════════════════════
-    // AGENDAMENTO
-    // ════════════════════════════════════════════════════
-    const formAgenda = document.getElementById('formAgenda');
-    const successAgenda = document.getElementById('successAgenda');
-    const selectHor = document.getElementById('horarios');
-    const inputData = document.getElementById('data');
-    const btnAgendar = document.getElementById('btnAgendar');
-
-    // CAMPOS OBRIGATÓRIOS
-    const camposObrigatoriosAgenda = formAgenda.querySelectorAll('[required]');
-
-    // BOTÃO COMEÇA DESABILITADO
+    selectHor.innerHTML = '<option value="">Carregando horários...</option>';
+    selectHor.disabled = true;
     btnAgendar.disabled = true;
 
-    function validarFormularioAgenda() {
+    try {
+      const response = await fetch(
+        `${WEBHOOK_DISPONIBILIDADE}?data=${encodeURIComponent(dataSelecionada)}`,
+        { method: 'GET', headers: { 'Accept': 'application/json' } }
+      );
 
-        const preenchidos = [...camposObrigatoriosAgenda].every(campo => {
+      if (!response.ok) {
+        throw new Error(`Falha ao consultar disponibilidade (${response.status}).`);
+      }
 
-            if (campo.type === 'checkbox' || campo.type === 'radio') {
-                return campo.checked;
-            }
+      const retorno = await response.json();
+      const slots = Array.isArray(retorno) ? retorno : (retorno.slots || []);
 
-            return campo.value.trim() !== '';
-        });
+      selectHor.innerHTML = '<option value="">Selecione o horário</option>';
 
-        btnAgendar.disabled = !(preenchidos && selectHor.value);
+      if (!Array.isArray(slots) || slots.length === 0) {
+        selectHor.innerHTML = '<option value="">Sem horários disponíveis</option>';
+        return;
+      }
+
+      slots.forEach(slot => {
+        // Compatível com o formato já utilizado: { inicio, hora }.
+        const inicio = slot.inicio ?? slot.start ?? slot.value;
+        const hora = slot.hora ?? slot.label ?? inicio;
+        if (!inicio) return;
+
+        const option = document.createElement('option');
+        option.value = inicio;
+        option.textContent = hora || inicio;
+        selectHor.appendChild(option);
+      });
+
+      if (selectHor.options.length === 1) {
+        selectHor.innerHTML = '<option value="">Sem horários disponíveis</option>';
+      }
+    } catch (error) {
+      console.error('Erro ao carregar disponibilidade:', error);
+      selectHor.innerHTML = '<option value="">Não foi possível carregar. Tente novamente.</option>';
+    } finally {
+      selectHor.disabled = false;
+      validarFormularioAgenda();
+    }
+  }
+
+  inputData.addEventListener('change', () => {
+    if (!inputData.value) return;
+
+    const selecionada = new Date(`${inputData.value}T00:00:00`);
+    if (!isDiaUtil(selecionada)) {
+      alert('Não há atendimento nessa data. Selecione outro dia disponível.');
+      inputData.value = toISO(proximoDiaUtil(selecionada));
+    }
+    carregarHorarios();
+    validarFormularioAgenda();
+  });
+
+  // ENVIO DO AGENDAMENTO
+  formAgenda.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    if (!formAgenda.reportValidity()) return;
+    if (!selectHor.value) {
+      alert('Selecione um horário disponível.');
+      return;
     }
 
-    camposObrigatoriosAgenda.forEach(campo => {
-        campo.addEventListener('input', validarFormularioAgenda);
-        campo.addEventListener('change', validarFormularioAgenda);
-    });
+    const dados = Object.fromEntries(new FormData(formAgenda).entries());
+    // Mantém o campo "inicio" usado pelo workflow anterior.
+    dados.inicio = selectHor.value;
 
-    function configurarCalendario() {
+    btnAgendar.disabled = true;
+    btnAgendar.textContent = 'Enviando solicitação...';
 
-        let hoje = new Date();
+    try {
+      const response = await fetch(WEBHOOK_AGENDAMENTO, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(dados)
+      });
 
-        if (hoje.getHours() >= 16) {
-            hoje.setDate(hoje.getDate() + 1);
-        }
+      if (!response.ok) {
+        throw new Error(`Falha ao enviar agendamento (${response.status}).`);
+      }
 
-        hoje.setHours(0, 0, 0, 0);
-
-        const minDate = proximoDiaUtil(hoje);
-        const maxDate = addDiasUteis(hoje, 5);
-
-        inputData.min = toISO(minDate);
-        inputData.max = toISO(maxDate);
-        inputData.value = toISO(minDate);
+      formAgenda.classList.add('hidden');
+      successAgenda.classList.remove('hidden');
+    } catch (error) {
+      console.error('Erro ao agendar:', error);
+      alert('Não foi possível enviar seu agendamento. Verifique sua conexão e tente novamente.');
+      btnAgendar.innerHTML = '<span aria-hidden="true">✓</span> Confirmar agendamento';
+      validarFormularioAgenda();
     }
+  });
 
-    async function carregarHorarios() {
-
-        const dataSel = inputData.value;
-
-        if (!dataSel) return;
-
-        selectHor.innerHTML = '<option value="">Carregando...</option>';
-        btnAgendar.disabled = true;
-
-        try {
-
-            const res = await fetch(`${BASE_URL}/disponibilidade?data=${dataSel}`);
-
-            if (!res.ok) {
-                throw new Error();
-            }
-
-            const data = await res.json();
-            const slots = data.slots || data;
-
-            if (!slots || slots.length === 0) {
-
-                selectHor.innerHTML =
-                    '<option value="">Sem horários disponíveis</option>';
-
-                validarFormularioAgenda();
-                return;
-            }
-
-            selectHor.innerHTML =
-                '<option value="">Selecione o horário</option>';
-
-            slots.forEach(slot => {
-
-                const o = document.createElement('option');
-
-                o.value = slot.inicio;
-                o.textContent = slot.hora;
-
-                selectHor.appendChild(o);
-            });
-
-            validarFormularioAgenda();
-
-        } catch {
-
-            selectHor.innerHTML =
-                '<option value="">Erro ao carregar horários</option>';
-
-            validarFormularioAgenda();
-        }
-    }
-
-    selectHor.addEventListener('change', validarFormularioAgenda);
-
-    inputData.addEventListener('change', () => {
-
-        const d = new Date(inputData.value + 'T00:00:00');
-
-        if (!isDiaUtil(d)) {
-
-            alert('Não há atendimento nesse dia. Selecione um dia útil.');
-
-            inputData.value = toISO(proximoDiaUtil(d));
-        }
-
-        carregarHorarios();
-        validarFormularioAgenda();
-    });
-
-    formAgenda.addEventListener('submit', async (e) => {
-
-        e.preventDefault();
-
-        const dados = Object.fromEntries(new FormData(formAgenda));
-        const inicio = selectHor.value;
-
-        if (!inicio) {
-            alert('Selecione um horário.');
-            return;
-        }
-
-        btnAgendar.disabled = true;
-        btnAgendar.innerHTML = 'Agendando...';
-
-        try {
-
-            const res = await fetch(`${BASE_URL}/agendar`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    ...dados,
-                    inicio
-                })
-            });
-
-            if (!res.ok) {
-                throw new Error();
-            }
-
-            formAgenda.style.display = 'none';
-            successAgenda.classList.remove('hidden');
-
-        } catch {
-
-            alert('Erro ao agendar. Tente novamente.');
-
-            btnAgendar.innerHTML = `
-                <svg viewBox="0 0 24 24">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-                Agendar Atendimento
-            `;
-
-            validarFormularioAgenda();
-        }
-    });
-
-    // RESET PARA NOVO AGENDAMENTO
-    window.resetAgenda = function () {
-
-        formAgenda.reset();
-
-        formAgenda.style.display = '';
-        successAgenda.classList.add('hidden');
-
-        btnAgendar.innerHTML = `
-            <svg viewBox="0 0 24 24">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-            </svg>
-            Agendar Atendimento
-        `;
-
-        configurarCalendario();
-        carregarHorarios();
-
-        setTimeout(validarFormularioAgenda, 300);
-    };
-
-    // INICIALIZAÇÃO AGENDAMENTO
+  // REINICIAR FORMULÁRIO
+  window.resetAgenda = function () {
+    formAgenda.reset();
+    formAgenda.classList.remove('hidden');
+    successAgenda.classList.add('hidden');
+    btnAgendar.innerHTML = '<span aria-hidden="true">✓</span> Confirmar agendamento';
     configurarCalendario();
     carregarHorarios();
     validarFormularioAgenda();
+  };
 
-    // ════════════════════════════════════════════════════
-    // CANCELAMENTO
-    // ════════════════════════════════════════════════════
-    const formCancel = document.getElementById('formCancel');
-    const protocoloEl = document.getElementById('protocolo');
-    const feedbackEl = document.getElementById('feedbackCancel');
-    const WEBHOOK_CANCEL = `${BASE_URL}/cancelar`;
+  // CANCELAMENTO
+  protocoloEl.addEventListener('input', () => {
+    protocoloEl.value = protocoloEl.value.replace(/\D/g, '');
+  });
 
-    protocoloEl.addEventListener('input', () => {
-        protocoloEl.value = protocoloEl.value.replace(/[^0-9]/g, '');
-    });
+  formCancel.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!formCancel.reportValidity()) return;
 
-    formCancel.addEventListener('submit', async (e) => {
+    const protocolo = protocoloEl.value.trim();
+    if (!protocolo) {
+      alert('Informe o número do protocolo.');
+      return;
+    }
 
-        e.preventDefault();
+    btnCancelar.disabled = true;
+    btnCancelar.innerHTML = '<span aria-hidden="true">…</span> Processando...';
+    feedbackEl.className = 'feedback-cancel hidden';
+    feedbackEl.textContent = '';
 
-        const protocolo = protocoloEl.value.trim();
+    try {
+      const response = await fetch(WEBHOOK_CANCELAMENTO, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ protocolo })
+      });
 
-        if (!protocolo) {
-            alert('Informe o número do protocolo.');
-            return;
-        }
+      if (!response.ok) {
+        throw new Error(`Falha ao cancelar (${response.status}).`);
+      }
 
-        const btnCancelar = document.getElementById('btnCancelar');
+      feedbackEl.textContent = 'Solicitação de cancelamento processada com sucesso.';
+      feedbackEl.className = 'feedback-cancel success';
+      formCancel.reset();
+    } catch (error) {
+      console.error('Erro ao cancelar:', error);
+      feedbackEl.textContent = 'Não foi possível cancelar. Confira o protocolo ou tente novamente.';
+      feedbackEl.className = 'feedback-cancel error';
+    } finally {
+      btnCancelar.disabled = false;
+      btnCancelar.innerHTML = '<span aria-hidden="true">×</span> Solicitar cancelamento';
+    }
+  });
 
-        btnCancelar.disabled = true;
-        btnCancelar.innerHTML = 'Processando...';
-
-        feedbackEl.classList.add('hidden');
-        feedbackEl.className = 'feedback-cancel hidden';
-
-        try {
-
-            const res = await fetch(WEBHOOK_CANCEL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    protocolo
-                })
-            });
-
-            if (!res.ok) {
-                throw new Error();
-            }
-
-            feedbackEl.textContent =
-                '✅ Cancelamento realizado com sucesso!';
-
-            feedbackEl.className =
-                'feedback-cancel success';
-
-            feedbackEl.classList.remove('hidden');
-
-            formCancel.reset();
-
-        } catch {
-
-            feedbackEl.textContent =
-                '❌ Não foi possível cancelar. Verifique o protocolo ou tente novamente.';
-
-            feedbackEl.className =
-                'feedback-cancel error';
-
-            feedbackEl.classList.remove('hidden');
-
-        } finally {
-
-            btnCancelar.disabled = false;
-
-            btnCancelar.innerHTML = `
-                <svg viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-                Cancelar Agendamento
-            `;
-        }
-    });
-
+  // INICIALIZAÇÃO
+  configurarCalendario();
+  carregarHorarios();
+  validarFormularioAgenda();
 });
