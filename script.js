@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'https://n8n.srv1352561.hstgr.cloud/webhook/agendaclinica';
   // Mantido o endpoint de cancelamento que já era utilizado.
   const WEBHOOK_CANCELAMENTO =
-    'https://n8n.srv1352561.hstgr.cloud/webhook/cancelar';
+    'https://n8n.srv1352561.hstgr.cloud/webhook/cancelaclinica';
 
   // Regras de calendário mantidas da versão anterior.
   // Dias bloqueados: domingo (0), quarta-feira (3) e sábado (6).
