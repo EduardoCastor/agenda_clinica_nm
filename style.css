@@ -146,12 +146,6 @@ select:disabled {
   margin-bottom: 12px;
 }
 
-.status-message.success {
-  background-color: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
 .status-message.error {
   background-color: #fee2e2;
   color: #991b1b;
@@ -165,6 +159,10 @@ select:disabled {
   align-items: center;
   gap: 20px;
   padding-top: 4px;
+}
+
+.modal-footer.center-footer {
+  justify-content: center;
 }
 
 .btn-cancel {
@@ -202,9 +200,100 @@ select:disabled {
   cursor: not-allowed;
 }
 
+.btn-submit.full-btn {
+  width: 100%;
+  padding: 13px 22px;
+  font-size: 0.95rem;
+}
+
+/* Tela de Encerramento / Sucesso */
+.success-screen {
+  text-align: center;
+}
+
+.success-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  background-color: #dcfce7;
+  color: #16a34a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 4px auto 16px;
+}
+
+.success-icon {
+  width: 34px;
+  height: 34px;
+}
+
+.success-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.success-subtitle {
+  font-size: 0.88rem;
+  color: #475569;
+  margin-bottom: 20px;
+  line-height: 1.45;
+}
+
+.summary-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: left;
+  margin-bottom: 16px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dashed #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-label {
+  color: #64748b;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.summary-item strong {
+  color: #1e293b;
+  font-weight: 600;
+  text-align: right;
+}
+
+.success-note {
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
 @media (max-width: 480px) {
   .form-row {
     grid-template-columns: 1fr;
     gap: 0;
+  }
+
+  .summary-item {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .summary-item strong {
+    text-align: left;
   }
 }
