@@ -23,7 +23,7 @@
         <button type="button" class="btn-close" id="btnFechar" aria-label="Fechar">&times;</button>
       </div>
 
-      <!-- Formulário -->
+      <!-- ETAPA 1: Formulário de Agendamento -->
       <form id="formAgendamento" class="modal-body">
         
         <!-- 1. Unidade / Filial -->
@@ -34,7 +34,7 @@
           </select>
         </div>
 
-        <!-- 2. Especialista e 3. Procedimento (Mantendo as opções de Tipo de Atendimento) -->
+        <!-- 2. Especialista e 3. Procedimento -->
         <div class="form-row">
           <div class="form-group">
             <label for="especialista">2. Especialista</label>
@@ -46,8 +46,7 @@
           <div class="form-group">
             <label for="tipo_atendimento">3. Procedimento</label>
             <select id="tipo_atendimento" name="tipo_atendimento" required>
-              <option value="" disabled selected>Selecione o tipo de atendimento</option>
-              <option value="Primeira consulta">Primeira consulta</option>
+              <option value="Primeira consulta" selected>Primeira consulta</option>
               <option value="Retorno de consulta">Retorno de consulta</option>
               <option value="Modulação Hormonal Bioidêntica">Modulação Hormonal Bioidêntica</option>
               <option value="Avaliação de Exames">Avaliação de Exames</option>
@@ -66,7 +65,7 @@
           <div class="form-group">
             <label for="horario">Horário Disponível</label>
             <select id="horario" name="horario" required disabled>
-              <option value="">Selecione uma data...</option>
+              <option value="">Buscando horários...</option>
             </select>
           </div>
         </div>
@@ -93,11 +92,10 @@
           </div>
         </div>
 
-        <!-- Campo oculto ou opcional de e-mail para manter compatibilidade caso necessário -->
         <input type="hidden" id="email" name="email" value="" />
         <input type="hidden" id="assunto" name="assunto" value="" />
 
-        <!-- Mensagem de feedback -->
+        <!-- Mensagem de erro caso ocorra falha na requisição -->
         <div id="statusMensagem" class="status-message" style="display: none;"></div>
 
         <hr class="divider" />
@@ -109,6 +107,57 @@
         </div>
 
       </form>
+
+      <!-- ETAPA 2: Tela de Encerramento / Confirmação -->
+      <div id="telaSucesso" class="modal-body success-screen" style="display: none;">
+        <div class="success-icon-wrapper">
+          <svg class="success-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+
+        <h2 class="success-title">Agendamento Confirmado!</h2>
+        <p class="success-subtitle">
+          Enviamos os detalhes da sua consulta para o seu WhatsApp. Confira o resumo abaixo:
+        </p>
+
+        <div class="summary-box">
+          <div class="summary-item">
+            <span class="summary-label">Paciente:</span>
+            <strong id="resumoNome">-</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Unidade:</span>
+            <strong id="resumoUnidade">-</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Especialista:</span>
+            <strong id="resumoEspecialista">-</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Procedimento:</span>
+            <strong id="resumoProcedimento">-</strong>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Data e Horário:</span>
+            <strong id="resumoDataHora">-</strong>
+          </div>
+        </div>
+
+        <p class="success-note">
+          Pedimos a gentileza de comparecer alguns minutos antes do horário agendado.
+        </p>
+
+        <hr class="divider" />
+
+        <div class="modal-footer center-footer">
+          <button type="button" class="btn-submit full-btn" id="btnNovoAgendamento">
+            Realizar Novo Agendamento
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 
